@@ -33,7 +33,7 @@ func try_hit(ball_pos: Vector3, racket_head_pos: Vector3, racket_head_vel: Vecto
 	if ball_prev_pos != Vector3.INF:
 		var seg := ball_pos - ball_prev_pos
 		if seg.length_squared() > 1e-9:
-			var t: float = clampf(-to_ball.dot(seg) / seg.length_squared(), 0.0, 1.0)
+			var t: float = clampf((racket_head_pos - ball_prev_pos).dot(seg) / seg.length_squared(), 0.0, 1.0)
 			to_ball = ball_prev_pos + seg * t - racket_head_pos
 	if to_ball.length() > SHELL_RADIUS:
 		return {}
