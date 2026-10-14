@@ -169,8 +169,8 @@
       "complete": false
     },
     {
-      "task": "Implement Desktop Mock Input Provider",
-      "description": "Provide mouse-driven and recorded synthetic racket input through the same interface as the Joy-Con driver for hardware-free development.",
+      "task": "Implement Recorded Swing Replay Provider",
+      "description": "Provide deterministic parameterized synthetic swings and replay streams through the shared input interface for automated headless tests only, with no mouse or keyboard play mode.",
       "steps": [
         {
           "step": 1,
@@ -178,18 +178,18 @@
         },
         {
           "step": 2,
-          "description": "Implement mouse mode mapping pointer motion to racket pose"
-        },
-        {
-          "step": 3,
           "description": "Add a recorded swing library with parameterized forehand, backhand, serve variants"
         },
         {
-          "step": 4,
+          "step": 3,
           "description": "Guarantee replay determinism for recorded swing streams"
+        },
+        {
+          "step": 4,
+          "description": "Wire the provider behind a test-only flag so shipping builds require Joy-Con motion input"
         }
       ],
-      "acceptance-criteria": "Mock provider must satisfy the same interface contract as the Joy-Con driver. Replaying a recorded swing must produce identical pose and velocity streams. Parameterized mock swings must reproduce the requested peak speed within 5 percent. Mouse mode must update racket pose every frame without dropping input events.",
+      "acceptance-criteria": "The provider must satisfy the same interface contract as the Joy-Con driver. Replaying a recorded swing must produce identical pose and velocity streams. Parameterized mock swings must reproduce the requested peak speed within 5 percent. No mouse or keyboard play path may exist in shipping builds.",
       "test-plan": {
         "unit": [
           "Replay of the same recorded swing produces identical pose and velocity streams",
