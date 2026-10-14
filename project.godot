@@ -1,0 +1,15 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+
+config_version=5
+
+[application]
+
+config/name="JoyCon Tennis"
+config/description="3D motion-controlled tennis played with a single Joy-Con (left or right handed), vs an omniscient teleporting opponent."
+config/version="0.1.0"
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
