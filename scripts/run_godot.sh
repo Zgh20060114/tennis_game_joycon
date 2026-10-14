@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Locate the installed Godot binary and run it against this project by default.
-# Usage: scripts/run_godot.sh [godot args...]   (no args -> launch project)
+# Locate the installed Godot binary and run it against this project.
+# Usage: scripts/run_godot.sh [godot args...]   (no args -> launch project window)
 set -euo pipefail
 
 PROJ_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -11,8 +11,4 @@ if [ ! -x "$BIN" ]; then
   exit 1
 fi
 
-if [ $# -eq 0 ]; then
-  exec "$BIN" --path "$PROJ_DIR"
-else
-  exec "$BIN" "$@"
-fi
+exec "$BIN" --path "$PROJ_DIR" "$@"
