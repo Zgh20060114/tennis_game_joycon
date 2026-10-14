@@ -22,7 +22,7 @@ const BOUNCE_FRICTION := 0.70               # horizontal velocity retention on b
 ## between the two posts, lowest at the center strap).
 static func net_height_at(x: float) -> float:
 	var t: float = clampf(absf(x) / NET_HALF_SPAN, 0.0, 1.0)
-	return NET_CENTER_HEIGHT + (NET_POST_HEIGHT - NET_CENTER_HEIGHT) * (1.0 - t * t)
+	return NET_CENTER_HEIGHT + (NET_POST_HEIGHT - NET_CENTER_HEIGHT) * t * t
 
 
 ## True when (x, z) is inside the singles court on the given side
