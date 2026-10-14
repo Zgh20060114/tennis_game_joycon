@@ -73,7 +73,7 @@ func _run() -> void:
 			# height: aim the landing just BEHIND the player's baseline.
 			var origin := Vector3(rng.randf_range(-2.0, 2.0), 1.0, -Court.HALF_LENGTH + 0.5)
 			var target := Vector3(rng.randf_range(-0.9, 0.9), Court.BALL_RADIUS, Court.HALF_LENGTH + rng.randf_range(0.2, 0.6))
-			var sol: Dictionary = ShotSolver.solve_shot(origin, target, 10.5)
+			var sol: Dictionary = ShotSolver.solve_shot(origin, target, 15.5)
 			if sol.ok:
 				scene.start_shot(origin, sol.velocity)
 				print("t=%4.1fs  来球！注意看腰高来球（已回击 %d）" % [now_s, returns])

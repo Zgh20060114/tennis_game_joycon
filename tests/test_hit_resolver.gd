@@ -74,6 +74,14 @@ func test_threshold_and_rejects() -> void:
 	var far := HitResolver.new()
 	check(far.try_hit(Vector3(0.5, 0.5, 0.5), Vector3.ZERO, Vector3(0, 0, 8.0), Vector3(0, 0.3, -1), 1.0, Vector3(0, 1, -10)).is_empty(),
 			"ball outside the racket shell produces no hit")
+	var sweep := HitResolver.new()
+	var swept: Dictionary = sweep.try_hit(Vector3(0, 0.2, -0.4), Vector3.ZERO, Vector3(0, 0, 8.0),
+			Vector3(0, 0.3, -1), 1.0, Vector3(0, 1, -10), Vector3(0, 0.2, 0.4))
+	check(not swept.is_empty(), "fast ball whose swept segment crosses the shell registers a hit")
+	var sweep_miss := HitResolver.new()
+	check(sweep_miss.try_hit(Vector3(0, 0.2, -0.4), Vector3.ZERO, Vector3(0, 0, 8.0),
+			Vector3(0, 0.3, -1), 1.0, Vector3(0, 1, -10), Vector3(0.6, 0.2, 0.4)).is_empty(),
+			"swept segment that misses the shell laterally produces no hit")
 
 
 func test_monotonic_speed() -> void:

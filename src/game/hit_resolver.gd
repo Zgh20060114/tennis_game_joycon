@@ -22,11 +22,18 @@ func reset() -> void:
 	_last_hit_s = -1e9
 
 
-## Attempt a hit. Returns {} when rejected, else
+## Attempt a hit. ball_prev_pos enables swept collision: fast balls tunnel
+## through a static shell between frames, so distance is measured to the
+## segment [prev, pos]. Returns {} when rejected, else
 ## {out_vel: Vector3, speed: float, quality: float}.
 func try_hit(ball_pos: Vector3, racket_head_pos: Vector3, racket_head_vel: Vector3,
-		face_dir_world: Vector3, now_s: float, aim_target: Vector3) -> Dictionary:
+		face_dir_world: Vector3, now_s: float, aim_target: Vector3,
+		ball_prev_pos := Vector3.INF) -> Dictionary:
+	var seg := ball_pos if ball_prev_pos == Vector3.INF else ball_pos - ball_prev_pos
 	var to_ball := ball_pos - racket_head_pos
+	if seg.length_squared() > 1e-9:
+		var t: float = clampf(-to_ball.dot(seg) / seg.length_squared(), 0.0, 1.0)
+		to_ball = ball_prev_pos + seg * t - racket_head_pos
 	if to_ball.length() > SHELL_RADIUS:
 		return {}
 	var swing_speed := racket_head_vel.length()

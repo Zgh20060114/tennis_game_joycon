@@ -66,6 +66,7 @@ func attach_driver(p_driver, p_handedness := "left", p_neutral := Quaternion.IDE
 func start_shot(from: Vector3, vel: Vector3, is_player_hit := false) -> void:
 	flight_res = BallSim.simulate(from, vel)
 	flight.start(flight_res, from, is_player_hit)
+	_prev_ball_pos = Vector3.INF
 	ball_view.hide_landing()
 
 
@@ -77,6 +78,7 @@ func _process(delta: float) -> void:
 		_try_hit(now_s)
 	if flight.active:
 		_advance_flight(delta)
+	_prev_ball_pos = ball_view.ball.position
 
 
 func _advance_flight(delta: float) -> void:
@@ -92,13 +94,16 @@ func _advance_flight(delta: float) -> void:
 		flight.active = false   # ball settled; the feeder may serve again
 
 
+var _prev_ball_pos := Vector3.INF
+
+
 func _try_hit(now_s: float) -> void:
 	if not flight.active or flight.player_hit:
 		return
 	var head: Vector3 = racket.head_position()
 	var hit: Dictionary = resolver.try_hit(
 			ball_view.ball.position, head, driver.head_velocity,
-			racket.face_normal(), now_s, aim_target)
+			racket.face_normal(), now_s, aim_target, _prev_ball_pos)
 	if hit.is_empty():
 		return
 	# Deterministic rest-of-flight from the exact contact state.
