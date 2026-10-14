@@ -1,0 +1,12 @@
+# Godot 4
+.godot/
+*.translation
+export_presets.cfg
+
+# Imported translations (automatically generated from CSV files)
+*.mo
+
+# System/tooling
+__pycache__/
+*.tmp
+.DS_Store
