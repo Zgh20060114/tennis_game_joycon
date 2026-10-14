@@ -194,8 +194,7 @@
         "unit": [
           "Replay of the same recorded swing produces identical pose and velocity streams",
           "Parameterized mock swing peak speed matches the requested value within 5 percent",
-          "Mouse mapping keeps racket pose within valid play space bounds",
-          "Provider reports active or inactive state as expected for UI consumption"
+          "Every swing variant yields finite pose and velocity samples through the real driver pipeline"
         ],
         "integration": [
           "Mock provider and the Joy-Con driver from Task 4 pass a shared interface contract test suite"

@@ -80,7 +80,8 @@ func pull() -> bool:
 	omega_world = filter.quat * omega_body
 	var a_lin: Vector3 = filter.quat * s.accel + Vector3(0.0, -AttitudeFilter.GRAVITY, 0.0)
 	_v_lin = _v_lin * exp(-V_LIN_DECAY * dt) + a_lin * dt
-	head_velocity = omega_world.cross(lever) + _v_lin
+	# lever is a body-frame offset; rotate it into world before the cross product.
+	head_velocity = omega_world.cross(quat * lever) + _v_lin
 	quat = filter.quat
 	return true
 
