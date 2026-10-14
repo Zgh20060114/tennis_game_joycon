@@ -13,7 +13,7 @@ const GYRO_RES_PER_DPS := 14247.0
 const EV_SYN := 0x00
 const EV_MSC := 0x04
 const SYN_REPORT := 0x00
-const MSC_TIMESTAMP := 0x00
+const MSC_TIMESTAMP := 0x05       # verified from a live hid-nintendo stream
 const EVENT_SIZE := 24            # sizeof(struct input_event) on 64-bit
 
 
@@ -66,30 +66,56 @@ class Parser:
 	var _pending: Dictionary = {}
 
 
-## Live device source: opens /dev/input/eventN and yields samples.
-## Note: reads may block until the controller sends data, so poll this from
-## a worker thread (JoyconDriver), never from the scene tree loop.
+## Live device source. Godot 4.7's FileAccess refuses to open character
+## devices outright, and OS.execute_with_pipe proved unreliable for a
+## long-lived blocking byte pump (dead pipes, exit hangs), so the device is
+## read by a stdlib-only Python bridge that forwards raw evdev bytes over
+## localhost UDP. Decoding stays in Parser (unit-tested); reads here are
+## non-blocking: no data simply returns {}.
+const BRIDGE_SCRIPT := "res://tools/evdev_udp_bridge.py"
+const BRIDGE_TIMEOUT_S := 3.0
+
 class Source:
 	var parser := Parser.new()
-	var file: FileAccess
+	var udp := PacketPeerUDP.new()
+	var pid := -1
+	var _bridge_ready := false
 
 	func _init(path: String) -> void:
-		file = FileAccess.open(path, FileAccess.READ)
-		if file == null:
-			push_error("EvdevImu.Source: cannot open %s (%s)" % [path, error_string(FileAccess.get_open_error())])
+		if udp.bind(0) != OK:
+			push_error("EvdevImu.Source: cannot bind UDP port")
+			return
+		var bridge_path := ProjectSettings.globalize_path(BRIDGE_SCRIPT)
+		pid = OS.create_process("python3", PackedStringArray([bridge_path, path, str(udp.get_local_port())]))
+		if pid == -1:
+			push_error("EvdevImu.Source: cannot spawn python3 bridge for %s" % path)
+			return
+		var t0 := Time.get_ticks_usec()
+		while Time.get_ticks_usec() - t0 < BRIDGE_TIMEOUT_S * 1e6:
+			if udp.get_available_packet_count() > 0:
+				udp.get_packet()
+				_bridge_ready = true
+				return
+			OS.delay_msec(10)
+		push_error("EvdevImu.Source: bridge did not report ready for %s" % path)
 
 	func is_valid() -> bool:
-		return file != null
+		return _bridge_ready
+
+	## Stop the bridge process and release the socket. Call before quitting.
+	func close() -> void:
+		if pid > 0:
+			OS.kill(pid)
+			pid = -1
+		udp.close()
+		_bridge_ready = false
 
 	func read_sample() -> Dictionary:
-		if file == null:
-			return {}
 		while true:
 			var s: Dictionary = parser.pop_sample()
 			if not s.is_empty():
 				return s
-			var chunk := file.get_buffer(512)
-			if chunk.is_empty():
+			if udp.get_available_packet_count() == 0:
 				return {}
-			parser.feed(chunk)
+			parser.feed(udp.get_packet())
 		return {}

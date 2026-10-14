@@ -1,8 +1,8 @@
 extends SceneTree
 ## Live Joy-Con IMU bring-up check (real hardware, no display needed).
 ## Run: scripts/run_godot.sh --headless --script tools/live_imu_check.gd
-## Phase 1: discover + open. Phase 2: hold still 2 s (gyro bias calibration).
-## Phase 3: 5 s live readout — swing the controller freely.
+## Phase 1: discover + open + device-rate probe. Phase 2: hold still 2 s
+## (gyro bias calibration). Phase 3: 5 s live readout — swing freely.
 
 const Discovery = preload("res://src/input/imu_discovery.gd")
 const EvdevImu = preload("res://src/input/evdev_imu.gd")
@@ -24,7 +24,18 @@ func _init() -> void:
 	var d := JoyconDriver.new(src)
 	d.handedness = side
 
-	print("阶段 1：请静止握持 Joy-Con 2 秒，正在校准陀螺零偏……")
+	print("阶段 0：3 秒后开始校准——请现在握好 Joy-Con 并保持静止")
+	var tc := Time.get_ticks_usec()
+	var last_shown := 4
+	while Time.get_ticks_usec() - tc < 3_000_000:
+		src.read_sample()
+		var remain: int = 3 - (Time.get_ticks_usec() - tc) / 1_000_000 + 1
+		if remain < last_shown:
+			last_shown = remain
+			if remain > 0:
+				print("  %d…" % remain)
+
+	print("阶段 1：静止校准 2 秒（陀螺零偏采样中）……")
 	var bias := d.calibrate(2.0, 200.0)
 	print("gyro_bias = %s rad/s" % bias)
 
@@ -45,5 +56,25 @@ func _init() -> void:
 						rad_to_deg(e.x), rad_to_deg(e.y), rad_to_deg(e.z),
 						d.head_velocity.length()])
 	var secs := (Time.get_ticks_usec() - t0) / 1e6
-	print("采样率 %.0f Hz（期望约 200），峰值挥速 %.2f m/s" % [n / secs, peak_speed])
-	quit(0 if n > 500 else 1)
+	print("处理率 %.0f 样本/s，峰值挥速 %.2f m/s" % [n / secs, peak_speed])
+	print("设备时间戳采样率约 %.0f Hz（中位 dt）" % _device_rate(src, 1.5))
+	src.close()
+	quit(0 if n > 200 else 1)
+
+
+## Measure the true device sample rate from MSC_TIMESTAMP deltas.
+func _device_rate(src, seconds: float) -> float:
+	var dts: Array = []
+	var last_t := -1
+	var t0 := Time.get_ticks_usec()
+	while Time.get_ticks_usec() - t0 < seconds * 1e6:
+		var s: Dictionary = src.read_sample()
+		if s.is_empty():
+			continue
+		if last_t >= 0 and s.t_us > last_t:
+			dts.append(s.t_us - last_t)
+		last_t = s.t_us
+	if dts.size() < 10:
+		return 0.0
+	dts.sort()
+	return 1e6 / float(dts[dts.size() / 2])

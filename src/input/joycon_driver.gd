@@ -98,15 +98,17 @@ func stop() -> void:
 	if _thread != null and _thread.is_started():
 		_thread.wait_to_finish()
 	_thread = null
+	if source != null and source.has_method("close"):
+		source.close()
 
 
 func _poll_loop() -> void:
-	# No explicit sleep: the real evdev source blocks in read_sample() while
-	# the controller has no data, so the thread parks in the kernel.
+	# The UDP source is non-blocking, so pace the worker thread explicitly.
 	while _running:
 		_mutex.lock()
 		pull()
 		_mutex.unlock()
+		OS.delay_usec(2000)
 
 
 func _decay(dt: float) -> void:

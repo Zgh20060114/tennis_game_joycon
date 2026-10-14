@@ -14,19 +14,21 @@ static func discover(side: String, sysfs_root := DEFAULT_SYSFS) -> String:
 	var inputs := DirAccess.get_directories_at(sysfs_root)
 	for input_name: String in inputs:
 		var base := sysfs_root.path_join(input_name)
-		var name_f := FileAccess.open(base.path_join("name"), FileAccess.READ)
-		if name_f == null:
+		if not _read_file(base.path_join("name")).contains("(IMU)"):
 			continue
-		var dev_name := name_f.get_as_text().strip_edges()
-		if not dev_name.contains("(IMU)"):
-			continue
-		var prod_f := FileAccess.open(base.path_join("id/product"), FileAccess.READ)
-		if prod_f == null:
-			continue
-		if prod_f.get_as_text().strip_edges().to_lower() != want_product:
+		if _read_file(base.path_join("id/product")).to_lower() != want_product:
 			continue
 		var events := DirAccess.get_directories_at(base)
 		for event_name: String in events:
 			if event_name.begins_with("event"):
 				return "/dev/input/" + event_name
 	return ""
+
+
+## sysfs files report size 0, which breaks FileAccess.get_as_text(); read a
+## fixed window to EOF instead.
+static func _read_file(path: String) -> String:
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return ""
+	return f.get_buffer(4096).get_string_from_utf8().strip_edges()
