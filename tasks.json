@@ -4,11 +4,26 @@
       "task": "Set Up Godot Project Skeleton And Toolchain",
       "description": "Install Godot 4.5 stable for Linux and create the project skeleton with git repository and headless test runner.",
       "steps": [
-        {"step": 1, "description": "Write install script that downloads the latest Godot stable Linux binary"},
-        {"step": 2, "description": "Create project.godot with application name, features, Forward Plus renderer"},
-        {"step": 3, "description": "Create directory layout for src, scenes, tests, scripts"},
-        {"step": 4, "description": "Initialize git repository on main branch with Godot .gitignore"},
-        {"step": 5, "description": "Add headless smoke test runner script verifying zero exit code"}
+        {
+          "step": 1,
+          "description": "Write install script that downloads the latest Godot stable Linux binary"
+        },
+        {
+          "step": 2,
+          "description": "Create project.godot with application name, features, Forward Plus renderer"
+        },
+        {
+          "step": 3,
+          "description": "Create directory layout for src, scenes, tests, scripts"
+        },
+        {
+          "step": 4,
+          "description": "Initialize git repository on main branch with Godot .gitignore"
+        },
+        {
+          "step": 5,
+          "description": "Add headless smoke test runner script verifying zero exit code"
+        }
       ],
       "acceptance-criteria": "Godot binary must respond to --version with 4.5 or higher. Project must import cleanly via godot --headless --import. Smoke test runner must execute headless and exit 0. Git repository must exist on main branch with .godot directory ignored.",
       "test-plan": {
@@ -20,18 +35,37 @@
         "integration": [],
         "e2e-manual": []
       },
-      "skills": ["setup-fresh-project", "installing-dependencies", "verification-before-completion"],
+      "skills": [
+        "setup-fresh-project",
+        "installing-dependencies",
+        "verification-before-completion"
+      ],
       "complete": false
     },
     {
       "task": "Implement Deterministic Ball Flight Simulator",
       "description": "Create the pure-logic BallSim module with fixed-step integration, bounce response, net collision, and landing classification.",
       "steps": [
-        {"step": 1, "description": "Define tennis court dimension constants plus ball physical parameters"},
-        {"step": 2, "description": "Implement fixed-step integrator with gravity plus optional air drag"},
-        {"step": 3, "description": "Implement ground bounce with restitution plus horizontal friction"},
-        {"step": 4, "description": "Implement net plane collision with event reporting"},
-        {"step": 5, "description": "Add landing point plus court classification API"}
+        {
+          "step": 1,
+          "description": "Define tennis court dimension constants plus ball physical parameters"
+        },
+        {
+          "step": 2,
+          "description": "Implement fixed-step integrator with gravity plus optional air drag"
+        },
+        {
+          "step": 3,
+          "description": "Implement ground bounce with restitution plus horizontal friction"
+        },
+        {
+          "step": 4,
+          "description": "Implement net plane collision with event reporting"
+        },
+        {
+          "step": 5,
+          "description": "Add landing point plus court classification API"
+        }
       ],
       "acceptance-criteria": "BallSim must produce identical state sequences for repeated identical inputs. No-drag trajectories must match closed-form projectile solutions within 1 cm at 20 m range. Ten second simulations must contain no NaN. Bounce vertical velocity must scale with configured restitution. Net collision event must fire when the trajectory crosses the net plane below net height.",
       "test-plan": {
@@ -48,16 +82,28 @@
         "integration": [],
         "e2e-manual": []
       },
-      "skills": ["tdd-workflow", "testing-safe-protocol"],
+      "skills": [
+        "tdd-workflow",
+        "testing-safe-protocol"
+      ],
       "complete": false
     },
     {
       "task": "Implement Return Trajectory Solver",
       "description": "Create a solver that computes initial ball velocity reaching a target landing point while clearing the net, built on BallSim.",
       "steps": [
-        {"step": 1, "description": "Implement ballistic initial guess from target range plus apex height"},
-        {"step": 2, "description": "Add iterative refinement scoring net clearance, landing error"},
-        {"step": 3, "description": "Enforce speed caps while rejecting unreachable targets with error codes"}
+        {
+          "step": 1,
+          "description": "Implement ballistic initial guess from target range plus apex height"
+        },
+        {
+          "step": 2,
+          "description": "Add iterative refinement scoring net clearance, landing error"
+        },
+        {
+          "step": 3,
+          "description": "Enforce speed caps while rejecting unreachable targets with error codes"
+        }
       ],
       "acceptance-criteria": "Solved trajectories must land within 5 cm of requested targets when resimulated by BallSim. All solved trajectories must clear the net with configurable minimum margin. Solver must reject impossible targets with explicit error codes. Convergence must complete within 100 iterations across a 12 by 8 grid of targets and speed tiers.",
       "test-plan": {
@@ -73,20 +119,38 @@
         ],
         "e2e-manual": []
       },
-      "skills": ["tdd-workflow", "testing-safe-protocol"],
+      "skills": [
+        "tdd-workflow",
+        "testing-safe-protocol"
+      ],
       "complete": false
     },
     {
       "task": "Implement Joy-Con Sensor Driver And Attitude Filter",
-      "description": "Read Joy-Con motion through the kernel IIO interface with L and R device matching, static calibration, and complementary attitude filtering.",
+      "description": "Read Joy-Con motion through the kernel evdev IMU interface with L and R device matching, static calibration, and complementary attitude filtering.",
       "steps": [
-        {"step": 1, "description": "Enumerate IIO devices, matching the configured Joy-Con side by sysfs identity"},
-        {"step": 2, "description": "Implement a polling thread reading accel, gyro raw values"},
-        {"step": 3, "description": "Add static calibration capturing gyro bias plus neutral pose"},
-        {"step": 4, "description": "Implement complementary filter fusing gyro with gravity reference"},
-        {"step": 5, "description": "Add left plus right handed mirror mapping of sensor axes"}
+        {
+          "step": 1,
+          "description": "Enumerate input devices, matching the configured Joy-Con side by name plus product id"
+        },
+        {
+          "step": 2,
+          "description": "Implement an evdev reader decoding accel, gyro samples at 200 Hz"
+        },
+        {
+          "step": 3,
+          "description": "Add static calibration capturing gyro bias plus neutral pose"
+        },
+        {
+          "step": 4,
+          "description": "Implement complementary filter fusing gyro with gravity reference"
+        },
+        {
+          "step": 5,
+          "description": "Add left plus right handed mirror mapping of sensor axes"
+        }
       ],
-      "acceptance-criteria": "Driver must discover the IIO device matching the configured handedness when a Joy-Con is connected. Filter output must converge to known orientations of synthetic streams within 2 degrees in 2 seconds. Calibrated static streams must drift below 1 degree per minute. Handedness mapping must flip yaw and roll consistently. Malformed sysfs readings must hold the last good sample without NaN.",
+      "acceptance-criteria": "Driver must discover the evdev IMU device matching the configured handedness when a Joy-Con is connected. Filter output must converge to known orientations of synthetic streams within 2 degrees in 2 seconds. Calibrated static streams must drift below 1 degree per minute. Handedness mirror option must flip the configured sensor axis signs. Malformed evdev bytes must hold the last good sample without NaN.",
       "test-plan": {
         "unit": [
           "Synthetic static gyro stream with known bias yields drift under 1 degree per minute after calibration",
@@ -98,17 +162,32 @@
         "integration": [],
         "e2e-manual": []
       },
-      "skills": ["tdd-workflow", "testing-safe-protocol"],
+      "skills": [
+        "tdd-workflow",
+        "testing-safe-protocol"
+      ],
       "complete": false
     },
     {
       "task": "Implement Desktop Mock Input Provider",
       "description": "Provide mouse-driven and recorded synthetic racket input through the same interface as the Joy-Con driver for hardware-free development.",
       "steps": [
-        {"step": 1, "description": "Define the shared input provider interface for pose, velocity streams"},
-        {"step": 2, "description": "Implement mouse mode mapping pointer motion to racket pose"},
-        {"step": 3, "description": "Add a recorded swing library with parameterized forehand, backhand, serve variants"},
-        {"step": 4, "description": "Guarantee replay determinism for recorded swing streams"}
+        {
+          "step": 1,
+          "description": "Define the shared input provider interface for pose, velocity streams"
+        },
+        {
+          "step": 2,
+          "description": "Implement mouse mode mapping pointer motion to racket pose"
+        },
+        {
+          "step": 3,
+          "description": "Add a recorded swing library with parameterized forehand, backhand, serve variants"
+        },
+        {
+          "step": 4,
+          "description": "Guarantee replay determinism for recorded swing streams"
+        }
       ],
       "acceptance-criteria": "Mock provider must satisfy the same interface contract as the Joy-Con driver. Replaying a recorded swing must produce identical pose and velocity streams. Parameterized mock swings must reproduce the requested peak speed within 5 percent. Mouse mode must update racket pose every frame without dropping input events.",
       "test-plan": {
@@ -123,18 +202,36 @@
         ],
         "e2e-manual": []
       },
-      "skills": ["tdd-workflow", "testing-safe-protocol"],
+      "skills": [
+        "tdd-workflow",
+        "testing-safe-protocol"
+      ],
       "complete": false
     },
     {
       "task": "Build Court Scene And Ball Visualization",
       "description": "Create the programmatic 3D court, net, lighting, ball mesh with trail, and landing markers driven by simulation state.",
       "steps": [
-        {"step": 1, "description": "Build court surface with boundary, service line meshes from dimension constants"},
-        {"step": 2, "description": "Build net mesh with 0.914 m center plus 1.07 m post heights"},
-        {"step": 3, "description": "Add lighting, sky, first person baseline camera rig"},
-        {"step": 4, "description": "Add ball mesh with motion trail plus bounce effect"},
-        {"step": 5, "description": "Add landing markers colored by simulation classification"}
+        {
+          "step": 1,
+          "description": "Build court surface with boundary, service line meshes from dimension constants"
+        },
+        {
+          "step": 2,
+          "description": "Build net mesh with 0.914 m center plus 1.07 m post heights"
+        },
+        {
+          "step": 3,
+          "description": "Add lighting, sky, first person baseline camera rig"
+        },
+        {
+          "step": 4,
+          "description": "Add ball mesh with motion trail plus bounce effect"
+        },
+        {
+          "step": 5,
+          "description": "Add landing markers colored by simulation classification"
+        }
       ],
       "acceptance-criteria": "Court line meshes must match official singles dimension constants within 1 mm. Net mesh must span 0.914 m center height and 1.07 m post height. Ball node position must follow BallSim state within 2 cm every frame. Landing markers must display the in or out color matching the simulation classification.",
       "test-plan": {
@@ -148,18 +245,35 @@
         ],
         "e2e-manual": []
       },
-      "skills": ["testing-safe-protocol"],
+      "skills": [
+        "testing-safe-protocol"
+      ],
       "complete": false
     },
     {
       "task": "Implement First Person Racket And Hit Resolution",
       "description": "Attach the racket to the first person view with handedness anchors and resolve swing hits into outgoing ball velocities.",
       "steps": [
-        {"step": 1, "description": "Model the racket mesh from primitives with strings plus grip"},
-        {"step": 2, "description": "Anchor racket pose per handedness from the input provider interface"},
-        {"step": 3, "description": "Implement swing velocity tracking with hit detection shell sweep"},
-        {"step": 4, "description": "Implement outgoing velocity blending face orientation with aim assist"},
-        {"step": 5, "description": "Add hit cooldown plus sweet spot speed scaling"}
+        {
+          "step": 1,
+          "description": "Model the racket mesh from primitives with strings plus grip"
+        },
+        {
+          "step": 2,
+          "description": "Anchor racket pose per handedness from the input provider interface"
+        },
+        {
+          "step": 3,
+          "description": "Implement swing velocity tracking with hit detection shell sweep"
+        },
+        {
+          "step": 4,
+          "description": "Implement outgoing velocity blending face orientation with aim assist"
+        },
+        {
+          "step": 5,
+          "description": "Add hit cooldown plus sweet spot speed scaling"
+        }
       ],
       "acceptance-criteria": "Swings above the speed threshold must hit balls entering the racket shell while slower swings must not. Outgoing ball speed must increase monotonically with swing speed. Aim assist must keep outgoing shots inside the opponent court across the defined face orientation range. Hit cooldown must prevent double hits on the same swing. Handedness option must mirror the racket anchor side.",
       "test-plan": {
@@ -176,18 +290,36 @@
         ],
         "e2e-manual": []
       },
-      "skills": ["tdd-workflow", "systematic-debugging"],
+      "skills": [
+        "tdd-workflow",
+        "systematic-debugging"
+      ],
       "complete": false
     },
     {
       "task": "Implement Serve Flow",
       "description": "Add the serve sequence with ball toss, timing window, and fault handling using configurable auto or manual toss.",
       "steps": [
-        {"step": 1, "description": "Implement the serve state machine with ready, toss, struck states"},
-        {"step": 2, "description": "Implement automatic toss with fixed apex timing"},
-        {"step": 3, "description": "Implement manual toss on button press with timing window"},
-        {"step": 4, "description": "Route serve hits through hit resolution with serve speed caps"},
-        {"step": 5, "description": "Report serve faults plus replay per configured rule"}
+        {
+          "step": 1,
+          "description": "Implement the serve state machine with ready, toss, struck states"
+        },
+        {
+          "step": 2,
+          "description": "Implement automatic toss with fixed apex timing"
+        },
+        {
+          "step": 3,
+          "description": "Implement manual toss on button press with timing window"
+        },
+        {
+          "step": 4,
+          "description": "Route serve hits through hit resolution with serve speed caps"
+        },
+        {
+          "step": 5,
+          "description": "Report serve faults plus replay per configured rule"
+        }
       ],
       "acceptance-criteria": "Auto toss must release the ball to a repeatable apex position each serve. Manual toss must grant a hit window matching configured bounds. Serve speed caps must clamp outgoing serve velocity. A serve landing out must trigger replay without score change under the default no double fault rule.",
       "test-plan": {
@@ -202,18 +334,36 @@
         ],
         "e2e-manual": []
       },
-      "skills": ["tdd-workflow", "testing-safe-protocol"],
+      "skills": [
+        "tdd-workflow",
+        "testing-safe-protocol"
+      ],
       "complete": false
     },
     {
       "task": "Implement Omniscient Teleporting Opponent AI",
       "description": "Create the opponent that predicts incoming shots with BallSim, teleports to intercept valid shots, and returns to random in-bounds targets.",
       "steps": [
-        {"step": 1, "description": "Implement shot prediction returning net clearance, landing point"},
-        {"step": 2, "description": "Implement intercept decision honoring configured error, reaction parameters"},
-        {"step": 3, "description": "Implement instant teleport to an intercept position behind the predicted landing point"},
-        {"step": 4, "description": "Implement timed scripted swing contacting the ball at the interception time"},
-        {"step": 5, "description": "Implement return sampling with solver-computed random in-bounds targets"}
+        {
+          "step": 1,
+          "description": "Implement shot prediction returning net clearance, landing point"
+        },
+        {
+          "step": 2,
+          "description": "Implement intercept decision honoring configured error, reaction parameters"
+        },
+        {
+          "step": 3,
+          "description": "Implement instant teleport to an intercept position behind the predicted landing point"
+        },
+        {
+          "step": 4,
+          "description": "Implement timed scripted swing contacting the ball at the interception time"
+        },
+        {
+          "step": 5,
+          "description": "Implement return sampling with solver-computed random in-bounds targets"
+        }
       ],
       "acceptance-criteria": "With error rate zero the AI must intercept every valid incoming shot and let net or out shots pass. Teleport must occur at hit time with no travel phase. Returns must land inside the player singles court with margin for all seeded samples and must clear the net. Prediction must match the real BallSim outcome exactly. Error rate above zero must produce misses at the configured rate.",
       "test-plan": {
@@ -230,18 +380,36 @@
         ],
         "e2e-manual": []
       },
-      "skills": ["tdd-workflow", "testing-safe-protocol"],
+      "skills": [
+        "tdd-workflow",
+        "testing-safe-protocol"
+      ],
       "complete": false
     },
     {
       "task": "Implement Tennis Rules And Scoring Engine",
       "description": "Create an event-driven referee handling bounce and fault calls, tennis scoring with sudden death, and server rotation.",
       "steps": [
-        {"step": 1, "description": "Define point outcome events from bounce, landing, net events"},
-        {"step": 2, "description": "Implement first bounce in, out calls on the opponent court"},
-        {"step": 3, "description": "Implement double bounce plus net fault point awards"},
-        {"step": 4, "description": "Implement 15 30 40 scoring with sudden death at 40 40"},
-        {"step": 5, "description": "Implement server rotation per game plus match end detection"}
+        {
+          "step": 1,
+          "description": "Define point outcome events from bounce, landing, net events"
+        },
+        {
+          "step": 2,
+          "description": "Implement first bounce in, out calls on the opponent court"
+        },
+        {
+          "step": 3,
+          "description": "Implement double bounce plus net fault point awards"
+        },
+        {
+          "step": 4,
+          "description": "Implement 15 30 40 scoring with sudden death at 40 40"
+        },
+        {
+          "step": 5,
+          "description": "Implement server rotation per game plus match end detection"
+        }
       ],
       "acceptance-criteria": "Scoring must progress 0 15 30 40 game for consecutive points won. At 40 40 the next point must win the game. First bounce out must award the point to the hitter's opponent. Double bounce must award the point to the last hitter. Net fault must award the point to the receiving side. Server must alternate each game and match end must trigger at the configured games won count.",
       "test-plan": {
@@ -259,18 +427,36 @@
         ],
         "e2e-manual": []
       },
-      "skills": ["tdd-workflow", "testing-safe-protocol"],
+      "skills": [
+        "tdd-workflow",
+        "testing-safe-protocol"
+      ],
       "complete": false
     },
     {
       "task": "Build Menus Options And HUD",
       "description": "Create the main menu, persisted options covering handedness and difficulty, and an in-game HUD fed by live game state.",
       "steps": [
-        {"step": 1, "description": "Build the main menu with start, options, quit actions"},
-        {"step": 2, "description": "Build the options panel for handedness, calibration, sensitivity, assist, AI difficulty, serve mode"},
-        {"step": 3, "description": "Persist options to a user settings file with clamped ranges"},
-        {"step": 4, "description": "Build the HUD showing score, server, rally count, swing speed"},
-        {"step": 5, "description": "Wire option changes into the live game configuration singletons"}
+        {
+          "step": 1,
+          "description": "Build the main menu with start, options, quit actions"
+        },
+        {
+          "step": 2,
+          "description": "Build the options panel for handedness, calibration, sensitivity, assist, AI difficulty, serve mode"
+        },
+        {
+          "step": 3,
+          "description": "Persist options to a user settings file with clamped ranges"
+        },
+        {
+          "step": 4,
+          "description": "Build the HUD showing score, server, rally count, swing speed"
+        },
+        {
+          "step": 5,
+          "description": "Wire option changes into the live game configuration singletons"
+        }
       ],
       "acceptance-criteria": "Menu must navigate between states without dead ends. Every option must persist across application restarts with clamped valid ranges. Changing handedness must switch the live input device mapping. Changing the AI error rate must change AI behavior. HUD score must match the scoring engine output during matches.",
       "test-plan": {
@@ -286,18 +472,35 @@
         ],
         "e2e-manual": []
       },
-      "skills": ["testing-safe-protocol"],
+      "skills": [
+        "testing-safe-protocol"
+      ],
       "complete": false
     },
     {
       "task": "Add Audio Haptics And Game Feel Polish",
       "description": "Add hit, whoosh, bounce sounds, swing trail, teleport effects, camera feedback, and Joy-Con rumble on contact.",
       "steps": [
-        {"step": 1, "description": "Add procedural hit, whoosh, bounce, net sounds"},
-        {"step": 2, "description": "Add racket swing trail rendering"},
-        {"step": 3, "description": "Add teleport flash plus particles for the opponent"},
-        {"step": 4, "description": "Add camera micro shake on hits"},
-        {"step": 5, "description": "Add rumble output through joypad force feedback"}
+        {
+          "step": 1,
+          "description": "Add procedural hit, whoosh, bounce, net sounds"
+        },
+        {
+          "step": 2,
+          "description": "Add racket swing trail rendering"
+        },
+        {
+          "step": 3,
+          "description": "Add teleport flash plus particles for the opponent"
+        },
+        {
+          "step": 4,
+          "description": "Add camera micro shake on hits"
+        },
+        {
+          "step": 5,
+          "description": "Add rumble output through joypad force feedback"
+        }
       ],
       "acceptance-criteria": "Each gameplay event must trigger its audio within one frame. The swing trail must render continuously during swings without artifacts in synthetic tests. Rumble requests must carry valid device, duration, amplitude parameters. The teleport effect must play exactly once per AI jump.",
       "test-plan": {
@@ -311,18 +514,35 @@
         ],
         "e2e-manual": []
       },
-      "skills": ["testing-safe-protocol"],
+      "skills": [
+        "testing-safe-protocol"
+      ],
       "complete": false
     },
     {
       "task": "Integrate Hardware Playtest And Document Game",
       "description": "Verify the full game with real Joy-Con on both hands, tune feel parameters, capture acceptance screenshots, and write the README.",
       "steps": [
-        {"step": 1, "description": "Write the Joy-Con bluetooth pairing plus permissions guide"},
-        {"step": 2, "description": "Run an automated scripted match soak from menu to match end"},
-        {"step": 3, "description": "Tune hit forgiveness, aim assist, AI presentation parameters"},
-        {"step": 4, "description": "Capture acceptance screenshots of court, HUD, teleport effects"},
-        {"step": 5, "description": "Write the README with build, run, controls, connection instructions"}
+        {
+          "step": 1,
+          "description": "Write the Joy-Con bluetooth pairing plus permissions guide"
+        },
+        {
+          "step": 2,
+          "description": "Run an automated scripted match soak from menu to match end"
+        },
+        {
+          "step": 3,
+          "description": "Tune hit forgiveness, aim assist, AI presentation parameters"
+        },
+        {
+          "step": 4,
+          "description": "Capture acceptance screenshots of court, HUD, teleport effects"
+        },
+        {
+          "step": 5,
+          "description": "Write the README with build, run, controls, connection instructions"
+        }
       ],
       "acceptance-criteria": "The automated scripted match must complete from menu through match end without errors. The game must sustain 60 fps at 1080p on the workstation. README instructions must reproduce a working launch on this machine. Acceptance screenshots must exist showing the court, HUD, teleport effects.",
       "test-plan": {
@@ -341,7 +561,9 @@
           "User confirms the driver streams motion from a real connected Joy-Con"
         ]
       },
-      "skills": ["verification-before-completion"],
+      "skills": [
+        "verification-before-completion"
+      ],
       "complete": false
     }
   ]
