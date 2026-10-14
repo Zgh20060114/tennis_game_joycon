@@ -11,10 +11,18 @@ static func mirror_quat(q: Quaternion) -> Quaternion:
 
 
 ## Grip transform in world space for the given handedness, camera transform,
-## and swing-relative orientation (neutral_quat.inverse() * driver.quat).
-static func anchor_transform(handedness: String, cam: Transform3D, rel_quat: Quaternion) -> Transform3D:
+## swing-relative orientation (neutral_quat.inverse() * driver.quat), and the
+## driver's spring-follow sway offset (world frame). The sway is mapped into
+## camera space (mirrored X for the left hand) and clamped so the racket
+## always stays in view around the ready pose.
+static func anchor_transform(handedness: String, cam: Transform3D, rel_quat: Quaternion,
+		pos_offset := Vector3.ZERO, max_sway := 0.7) -> Transform3D:
 	var right := handedness != "left"
 	var side := 1.0 if right else -1.0
 	var q := rel_quat if right else mirror_quat(rel_quat)
-	var local := Transform3D(q, Vector3(side * READY_OFFSET.x, READY_OFFSET.y, READY_OFFSET.z))
+	var sway: Vector3 = cam.basis.inverse() * pos_offset
+	if not right:
+		sway.x = -sway.x
+	sway = sway.limit_length(max_sway)
+	var local := Transform3D(q, Vector3(side * READY_OFFSET.x, READY_OFFSET.y, READY_OFFSET.z) + sway)
 	return cam * local

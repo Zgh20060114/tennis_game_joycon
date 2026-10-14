@@ -45,7 +45,31 @@ func _init() -> void:
 	test_dropout_continuity()
 	test_swing_velocity_magnitude()
 	test_mirror_mapping()
+	test_sway_follow()
 	test_discovery_with_fake_sysfs()
+
+
+func test_sway_follow() -> void:
+	var src := FakeSource.new()
+	# 0.4 s accelerating toward +X world while upright, then 1.5 s static.
+	for n in 48:
+		src.samples.append({"t_us": (n + 1) * 8333, "gyro": Vector3.ZERO, "accel": Vector3(20.0, 9.81, 0)})
+	for n in 300:
+		src.samples.append({"t_us": (576 + n + 1) * 8333, "gyro": Vector3.ZERO, "accel": Vector3(0, 9.81, 0)})
+	var d := JoyconDriver.new(src)
+	var peak := 0.0
+	for n in 48:
+		d.pull()
+		peak = maxf(peak, d.pos_offset.x)
+	for n in 300:
+		d.pull()
+	check(peak > 0.25, "fast translation sways the racket follow offset toward the move direction (%.3f m)" % peak)
+	check(d.pos_offset.length() < 0.15, "sway springs back to ready after the hand stops")
+	var cam := Transform3D(Basis.IDENTITY, Vector3(0, 1.6, 12.9))
+	var xf: Transform3D = preload("res://src/game/racket_anchor.gd").anchor_transform("right", cam, Quaternion.IDENTITY, Vector3(50, 0, 0))
+	var local_offset: Vector3 = xf.origin - cam.origin
+	check(local_offset.length() < 1.2 and xf.origin.x > 0.25,
+			"anchor sway is clamped so the racket stays around the ready pose")
 	print("----------------------------------------")
 	print("%d/%d checks passed" % [checks - failures, checks])
 	quit(1 if failures > 0 else 0)

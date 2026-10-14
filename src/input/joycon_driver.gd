@@ -15,6 +15,7 @@ const Discovery = preload("res://src/input/imu_discovery.gd")
 
 const LEVER_DEFAULT := Vector3(0.0, -0.55, 0.0)   # grip -> head in body frame
 const V_LIN_DECAY := 2.0                          # 1/s leak factor
+const POS_DECAY := 3.0                            # 1/s spring-back of the sway offset
 const DT_MIN := 0.0005
 const DT_MAX := 0.05
 
@@ -27,6 +28,7 @@ var lever := LEVER_DEFAULT
 var quat := Quaternion.IDENTITY
 var omega_world := Vector3.ZERO
 var head_velocity := Vector3.ZERO
+var pos_offset := Vector3.ZERO     # world-frame sway: short-term translation estimate
 
 var _last_t_us := -1
 var _v_lin := Vector3.ZERO
@@ -80,6 +82,10 @@ func pull() -> bool:
 	omega_world = filter.quat * omega_body
 	var a_lin: Vector3 = filter.quat * s.accel + Vector3(0.0, -AttitudeFilter.GRAVITY, 0.0)
 	_v_lin = _v_lin * exp(-V_LIN_DECAY * dt) + a_lin * dt
+	# Spring-follow sway: double integration with leaks. The IMU has no
+	# absolute position reference, so this is deliberately a bounded
+	# displacement that follows fast hand moves and springs back to ready.
+	pos_offset = pos_offset * exp(-POS_DECAY * dt) + _v_lin * dt
 	# lever is a body-frame offset; rotate it into world before the cross product.
 	head_velocity = omega_world.cross(quat * lever) + _v_lin
 	quat = filter.quat
@@ -116,6 +122,7 @@ func _decay(dt: float) -> void:
 	# No data (or dropout): freeze pose, let velocities bleed off smoothly.
 	_v_lin = _v_lin * exp(-V_LIN_DECAY * dt)
 	head_velocity = head_velocity * exp(-V_LIN_DECAY * dt)
+	pos_offset = pos_offset * exp(-POS_DECAY * dt)
 
 
 func _default_dt() -> float:

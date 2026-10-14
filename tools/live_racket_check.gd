@@ -50,7 +50,7 @@ func _run() -> void:
 	scene.player_returned.connect(func(hit): returns += 1; print("  好球！回击成功 挥速%.1fm/s (共 %d)" % [hit.speed, returns]))
 
 	var t0 := Time.get_ticks_msec()
-	var last_feed := -10.0
+	var last_feed := -3.0   # first feed at t=1.5 s, right after calibration
 	var last_diag := 0.0
 	var prev_active := false
 	var rng := RandomNumberGenerator.new()
@@ -69,12 +69,14 @@ func _run() -> void:
 				print("t=%4.1fs  挥速 %.1f m/s，球距拍心 %.2f m" % [now_s, spd, dist])
 		if not scene.flight.active and now_s - last_feed >= FEED_PERIOD:
 			last_feed = now_s
-			var origin := Vector3(rng.randf_range(-3.0, 3.0), 1.0, -Court.HALF_LENGTH + 0.5)
-			var target := Vector3(rng.randf_range(-2.5, 2.5), Court.BALL_RADIUS, rng.randf_range(5.0, 10.0))
-			var sol: Dictionary = ShotSolver.solve_shot(origin, target, 13.0)
+			# Feed so the ball crosses the player's strike zone at waist
+			# height: aim the landing just BEHIND the player's baseline.
+			var origin := Vector3(rng.randf_range(-2.0, 2.0), 1.0, -Court.HALF_LENGTH + 0.5)
+			var target := Vector3(rng.randf_range(-0.9, 0.9), Court.BALL_RADIUS, Court.HALF_LENGTH + rng.randf_range(0.2, 0.6))
+			var sol: Dictionary = ShotSolver.solve_shot(origin, target, 10.5)
 			if sol.ok:
 				scene.start_shot(origin, sol.velocity)
-				print("t=%4.1fs  来球！（已回击 %d）" % [now_s, returns])
+				print("t=%4.1fs  来球！注意看腰高来球（已回击 %d）" % [now_s, returns])
 
 	print("结束：共回击 %d 球" % returns)
 	d.stop()

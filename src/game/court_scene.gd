@@ -73,7 +73,7 @@ func _process(delta: float) -> void:
 	var now_s := Time.get_ticks_msec() / 1000.0
 	if driver != null:
 		var rel: Quaternion = neutral_quat.inverse() * driver.quat
-		racket.global_transform = RacketAnchor.anchor_transform(handedness, camera.global_transform, rel)
+		racket.global_transform = RacketAnchor.anchor_transform(handedness, camera.global_transform, rel, driver.pos_offset)
 		_try_hit(now_s)
 	if flight.active:
 		_advance_flight(delta)
